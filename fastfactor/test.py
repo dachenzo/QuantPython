@@ -3,9 +3,9 @@ import pandas as pd
 import numpy as np
 import time
 
-# prices = [100, 105, 110, 120, 125, 130, 140]
+prices = [100, 105, 110, 120, 125, 130, 140]
 
-# lookback = 3
+lookback = 3
 
 # momentum_vals = fastfactor.momentum(prices, lookback)
 
@@ -20,21 +20,21 @@ import time
 
 
 
-# # Generate synthetic data
+# Generate synthetic data
 # np.random.seed(42)
 # n = 100_000  # 100,000 data points
 # x = np.random.randn(n).tolist()
 # y = np.random.randn(n).tolist()
 # window = 50
 
-# # Pandas rolling correlation
+# Pandas rolling correlation
 # df = pd.DataFrame({"x": x, "y": y})
 
 # start = time.time()
 # pandas_corr = df["x"].rolling(window).corr(df["y"])
 # pandas_time = time.time() - start
 
-# # FastFactor rolling correlation
+# FastFactor rolling correlation
 # start = time.time()
 # fast_corr = fastfactor.rolling_correlation(x, y, window)
 # fastfactor_time = time.time() - start
@@ -48,7 +48,10 @@ import time
 
 # print("Exponential Moving Average:", ema)
 
-prices = [100, 102, 98, 105, 110, 120]
-percentile_90 = fastfactor.rolling_percentile(prices, 2, 90)
+# prices = [100, 102, 98, 105, 110, 120]
+# percentile_90 = fastfactor.rolling_percentile(prices, 2, 90)
 
-print("90th Percentile:", percentile_90)
+# print("90th Percentile:", percentile_90)
+prices = [100, 98, 97, 95, 93, 94, 91, 90, 89, 88, 87, 86, 85, 84, 83]
+rsi = fastfactor.rolling_rsi(prices, 14)  # Typical window size is 14
+print("Rolling RSI:", rsi)

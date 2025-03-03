@@ -10,8 +10,41 @@ using namespace std;
 namespace py = pybind11;
 
 //Super fast rolling percentile needed, O(nlogwindow) is too large
+// an efficient rolling update using smoothing (Wilder’s method), which would allow updating the averages in O(1) time for rsi
 
 
+
+void compute_avg_gain_loss(const std::vector<double>& prices, int start_index, int window, double& avg_gain, double& avg_loss) {
+    double gain_sum = 0.0, loss_sum = 0.0;
+    for (int i = start_index + 1; i < start_index + window; ++i) {
+        double change = prices[i] - prices[i - 1];
+        if (change > 0) {
+            gain_sum += change;
+        } else {
+            loss_sum += -change;
+        }
+    }
+    avg_gain = gain_sum / window;  // ✅ Fixed
+    avg_loss = loss_sum / window;  // ✅ Fixed
+}
+
+std::vector<double> rolling_rsi(const std::vector<double>& prices, int window) {
+    size_t n = prices.size();
+    if (n < window) return {};
+
+    std::vector<double> rsi_values(n - window + 1, 0.0);
+    
+    for (size_t i = 0; i <= n - window; ++i) {
+        double avg_gain = 0.0, avg_loss = 0.0;
+        compute_avg_gain_loss(prices, i, window, avg_gain, avg_loss);
+
+        double rs = (avg_loss == 0) ? std::numeric_limits<double>::infinity() : avg_gain / avg_loss;
+        double rsi = (avg_loss == 0) ? 100 : 100 - (100 / (1 + rs));  // ✅ Fixed
+        rsi_values[i] = rsi;
+    }
+
+    return rsi_values;
+}
 
 
 //Possible futher optimisation to avoid sorting every loop and the erase function
@@ -202,4 +235,5 @@ PYBIND11_MODULE(fastfactor, m) {
     m.def("rolling_zscore", &rolling_zscore, "Compute rolling Z-score normalization");
     m.def("exponential_moving_average", &exponential_moving_average, "Compute EMA");
     m.def("rolling_percentile", &rolling_percentile, "Compute rolling percentile");
+    m.def("rolling_rsi", &rolling_rsi, "Compute rolling RSI");
 }
